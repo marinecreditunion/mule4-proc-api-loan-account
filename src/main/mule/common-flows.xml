@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="LoanNameSFResponseTransformationFlow" doc:id="d50245f5-8d48-46c6-b90a-40207aeebe65" >
+		<ee:transform doc:name="TransformLoanNameSFresponseToValidXML" doc:id="fdf679e3-f409-416a-9544-7739c767228f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+/*----Co-Borrower = 01 Joint,Related Entity = 21 Co-Signer,Co-Signer = 21 Co-Signer-- */
+var ECOACodes = [{"Borrower" : "1"},{"Co-Borrower" : "2"},{"Co-Signer" : "5"},{"Related Entity" : "5"}]
+fun getECOACodes(accountType) =
+(
+	if ( !isEmpty(ECOACodes[accountType][0])) ECOACodes[accountType][0] else ""
+)
+var jointAccountTypes = [{"Joint":"01"},{"Co-Borrower":"01"},{"Related Entity":"21"},{"Co-Signer":"21"}]
+fun getjointAccountTypes(accountType) =
+(
+	if ( !isEmpty(jointAccountTypes[accountType][0])) jointAccountTypes[accountType][0] else "01"
+)
+fun convertPhoneNumbers(phoneNumber) =
+(
+	if ( (!isEmpty(phoneNumber)) and (sizeOf(phoneNumber) as String == "11")) (phoneNumber[1 to 3] ++ "-" ++ phoneNumber[4 to 6] ++ "-" ++ phoneNumber[7 to 10]) else if ((!isEmpty(phoneNumber)) and (sizeOf(phoneNumber) as String == "10")) (phoneNumber[0 to 2] ++ "-" ++ phoneNumber[3 to 5] ++ "-" ++ phoneNumber[6 to 9]) else phoneNumber
+)
+---
+CreateLoanNameRecord : {
+    Request : {
+        AddressFull: payload.LLC_BI__Home_Address__pc default '',
+        BirthDate: payload.PersonBirthdate default '',
+        City: upper(payload.LLC_BI__Home_City__pc) default '',
+        CurrGrossMonthPay: if (!isEmpty(payload.LLC_BI__Monthly_Income__pc)) payload.LLC_BI__Monthly_Income__pc as Number as String {format:'#.00'} else 0.00 default 0.00,
+        Email: payload.PersonEmail default '',
+        ECOACode: if (!isEmpty(payload.LLC_BI__Borrower_Type__c)) getECOACodes(payload.LLC_BI__Borrower_Type__c) else "" default "",
+        EmployerName: payload.FinServ__CurrentEmployer__pc default'',
+        ExtraAddress: null,
+        First: payload.FirstName default '',
+        HomePhone : convertPhoneNumbers(payload.PersonHomePhone) default '',
+        IdentDocFlag1 : null,
+        IdentIdDescription1 : null,
+        IdentIdExpireDate1: null,
+        IdentIdIssueDate1: null,
+        IdentIdNumber1: null,
+        IdentIdVerifyDate1: null,
+        IdentIdType1 : null,
+        Last : payload.LastName default '',
+        LastAddrVerifDate : null,
+        Middle: payload.MiddleName default '',
+        MobilePhone : convertPhoneNumbers(payload.PersonMobilePhone) default '',
+        MothersMaidenName : payload.FinServ__MotherMaidenName__pc default '',
+        NameFormat: null,
+        Occupation : payload.FinServ__Occupation__pc default '',
+        Restrict:null,
+        Sex : '',
+        Ssn: if (!isEmpty(payload.LLC_BI__SS__pc)) (payload.LLC_BI__SS__pc replace /[^\.\d]/ with "") as Number as String {format:'000000000'} else null default '',
+        SsnType : null,
+        State : payload.LLC_BI__Home_State__pc default '',
+        Street : null,
+        SubType : null,
+        Suffix : null,
+        Title : null,
+        Type:  if (!isEmpty(payload.LLC_BI__Borrower_Type__c)) getjointAccountTypes(payload.LLC_BI__Borrower_Type__c) else "01",
+        UsPersonFlag : null,
+        UserAmount1 : null,
+        UserAmount2 : null,
+        UserChar1 : null,
+        UserChar2 : null,
+        UserChar3 : null,
+        UserChar4 : null,
+        UserDate1 : null,
+        UserDate2 : null,
+        WorkPhone : convertPhoneNumbers(payload.Work_Phone__pc) default '',
+        WorkPhoneExtension : '',
+        ZipCode: payload.LLC_BI__Home_Zipcode__pc default '',
+        LoanId : if (!isEmpty(vars.NextLoanID)) (vars.NextLoanID ) else vars.NextLoanID default null,
+        AccountNumber : vars.AccountNumber
+    }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="LoanTrackingSFResponseTransformationFlow" doc:id="01abaec3-e306-45a5-aca6-615e7080b111" >
+		<ee:transform doc:name="TransformLoanTrackingSFresponseToValidXML" doc:id="fc5ad20e-a336-48e0-8ead-07aa1cc71604" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+var userchar8 = [{"MCU Foundation":"Y"},{"Loan Documentation Fee":"Y"},{"DMV Fee":"Y"},{"GAP":"Y"},{"UCC Fee":"Y"}]
+var glAccount = [{"ACH Payment": "081045-0000.0000"},{"MCU Foundation":"081045-0000.0000"},{"Loan Documentation Fee":"015014-0000.0000"},{"DMV Fee":"081335-0000.0000"},{"GAP":"081360-0000.0000"},{"UCC Fee":"024050-0000.0000"}]
+var typecodes = [{"LLC_BI__Collateral__c":"30"},{"Disbursement__c":"50"},{"ELA":"51"}]
+var gap = payload.Disbursements filter (($.Disbursement_Method__c as String) == "GAP")
+fun checkDebtProtect(val) =
+(	
+	if( !isEmpty(val)) 
+		if(((payload.cm_Debt_Protection_Option__c) != "Not Selected") and ((payload.cm_Debt_Protection_Option__c) != "Declined")) 1 else 0 
+	else  0
+)
+fun getUserCode3() =
+(
+	if(! isEmpty(gap)) 1 else 0
+)
+
+fun getUserAmount(val) = 
+(
+    if(getUserCode3()==1)
+        (val map $ as Number) reduce ($ + $$)
+    else null
+
+)
+fun getuserchar8(val) =
+(
+	if ( !isEmpty(userchar8[val][0])) userchar8[val][0] else "N"
+)
+
+fun getglAccount(val) =
+(
+	if ( !isEmpty(glAccount[val][0])) glAccount[val][0] else null
+)
+
+fun getTypeCode(val) =
+(
+	if ( !isEmpty(typecodes[val][0])) typecodes[val][0] else null
+)
+
+fun validateDisbursementCheck(val) =
+(
+	if (!isEmpty(val) and val as String == "Check") true else false
+)
+
+fun validateCollateral(val) =
+(
+	if (!isEmpty(val) and val as String == "LLC_BI__Collateral__c") true else false
+)
+
+fun validateELA(val) =
+(
+	if (!isEmpty(val)) true else false
+)
+---
+CreateLoanTracking : {
+	Request : {
+		ExpireDate : null,
+		//TypeValue: payload."type",
+		TrackingType : if (!isEmpty(payload."type") and payload."type" == "Disbursement__c") payload.Disbursement_Method__c else null,
+		Type: if (!isEmpty(payload."type")) getTypeCode(payload."type") else null default null,
+		UserAmount1: if (!isEmpty(payload."type") and payload."type" == "Disbursement__c") (if(payload.Disbursement_Method__c == "Loan Documentation Fee") 75 else payload.Disbursement_Amount__c) else if (!isEmpty(payload."type") and payload."type" == "LLC_BI__Collateral__c") payload.LLC_BI__Value__c else null default null,
+		UserAmount2: if(validateELA(payload.Disbursements)) (getUserAmount(gap.Disbursement_Amount__c)) else null default null,
+		UserAmount3: null,
+		UserAmount4: null,
+		UserAmount5: null,
+		UserAmount6: null,
+		UserAmount7: null,
+		UserAmount8: null,
+		UserAmount9: null,
+		UserAmount10: null,
+		UserAmount11: if(validateELA(payload.Disbursements)) (getUserAmount(gap.Disbursement_Amount__c)) else null default null,
+		UserAmount12: null,
+		UserAmount13: null,
+		UserAmount14: null,
+		UserAmount15: null,
+		UserAmount16: null,
+		UserAmount17: null,
+		UserAmount18: null,
+		UserAmount19: null,
+		UserAmount20: null,
+		UserChar1 : if (validateDisbursementCheck(payload.Disbursement_Method__c)) payload.Payee__c else if (validateCollateral(payload."type")) payload.LLC_BI__Make__c else null default null,
+		UserChar2 : if (validateDisbursementCheck(payload.Disbursement_Method__c)) payload.Check_Line_2__c else if (validateCollateral(payload."type")) payload.LLC_BI__Model__c else null default null,
+		UserChar3 : if (validateDisbursementCheck(payload.Disbursement_Method__c)) payload.Check_Line_3__c else if (validateCollateral(payload."type")) payload.LLC_BI__VIN__c else null default null,
+		UserChar4 : if (validateDisbursementCheck(payload.Disbursement_Method__c)) payload.Check_Line_4__c else null default null,
+		UserChar5 : if (validateDisbursementCheck(payload.Disbursement_Method__c)) payload.Memo__c else if (validateCollateral(payload."type")) payload.LLC_BI__Collateral_Insurance_Company__c else null default null,
+		UserChar6 : if (validateCollateral(payload."type")) payload.LLC_BI__Collateral_Insurance_Phone__c else null default null,
+		UserChar7 : if (!isEmpty(payload.Disbursement_Method__c)) getglAccount(payload.Disbursement_Method__c) else null default null,
+		//UserChar8 : if (!isEmpty(payload.Disbursement_Method__c) and getuserchar8(payload.Disbursement_Method__c) as String == "Y") vars.lastname ++ vars.AccountNumber ++ "112" else if (validateCollateral(payload."type")) payload.LLC_BI__Collateral_Insurance_Policy_Number__c else null default null,
+		UserChar9 : null,
+		UserChar10 : null,
+		UserChar11 : if (!isEmpty(payload.Disbursement_Method__c) and payload.Disbursement_Method__c == "Share Deposit") payload.MCU_Account_to_Credit__c else null default null,
+		UserChar12 : if (!isEmpty(payload.Disbursement_Method__c) and payload.Disbursement_Method__c == "Loan Payment") payload.cm_MCU_Loan_Payoff__c else null default null,
+		UserChar13 : null,
+		UserChar14 : if (validateCollateral(payload."type")) payload.Name else null default null,
+		UserChar15 : null,
+		UserChar16 : null,
+		UserChar17 : null,
+		UserChar18 : if (validateCollateral(payload."type")) payload.LLC_BI__Collateral_Type__r.Name else null default null,
+		UserChar19 : null,
+		UserChar20 : null,
+		UserCode1 : null,
+		UserCode2 : if (validateCollateral(payload."type")) payload.LLC_BI__Year__c else null default null,
+		UserCode3 : if(validateELA(payload.Disbursements)) getUserCode3() else null default null,
+		UserCode4 : if(validateELA(payload.Disbursements) and (getUserCode3() == 1)) vars.LoanOfficer else null default null,
+		UserCode5 : if(validateELA(payload.Disbursements) and (checkDebtProtect(payload.cm_Debt_Protection_Option__c) == 1)) vars.LoanOfficer  else null default null,
+		UserCode6 : null,
+		UserCode7 : null,
+		UserCode8 : null,
+		UserCode9 : null,
+		UserCode10 : null,
+		UserCode11 : null,
+		UserCode12 : null,
+		UserCode13 : null,
+		UserCode14 : if(validateELA(payload.Disbursements)) payload.LLC_BI__Term_Months__c else null default null,
+		UserCode15 : null,
+		UserCode16 : null,
+		UserCode17 : null,
+		UserCode18 : null,
+		UserCode19 : null,
+		UserCode20 : if (validateCollateral(payload."type")) payload.CollateralNumber else null default null,
+		UserDate1 : if (validateCollateral(payload."type")) payload.Insurance_Effective_Date__c else null default null,
+		UserDate2 : if (validateCollateral(payload."type")) payload.LLC_BI__Insurance_Expiration_Date__c else null default null,
+		UserDate3 : if(validateELA(payload.Disbursements) and (checkDebtProtect(payload.cm_Debt_Protection_Option__c) == 1)) vars.LoanOpenDate as Date {format: "MM/dd/yyyy"} as String {format: "yyyy-MM-dd"} else null default null,
+		UserDate4 : if(validateELA(payload.Disbursements) and (getUserCode3()== 1)) vars.LoanOpenDate as Date {format: "MM/dd/yyyy"} as String {format: "yyyy-MM-dd"} else null default null,
+		UserDate5 : null,
+		UserDate6 : null,
+		UserDate7 : null,
+		UserDate8 : null,
+		UserDate9 : null,
+		UserDate10 : null,
+		UserDate11 : null,
+		UserDate12 : null,
+		UserDate13 : null,
+		UserDate14 : null,
+		UserDate15 : null,
+		UserDate16 : null,
+		UserDate17 : null,
+		UserDate18 : null,
+		UserDate19 : null,
+		UserDate20 : null,
+		UserId : null,
+		UserNumber1 : if (validateCollateral(payload."type")) payload.Mileage__c else null default null,
+		UserNumber2 : null,
+		UserNumber3 : null,
+		UserNumber4 : null,
+		UserNumber5 : null,
+		UserNumber6 : null,
+		UserNumber7 : null,
+		UserNumber8 : null,
+		UserNumber9 : null,
+		UserNumber10 : null,
+		UserNumber11 : null,
+		UserNumber12 : null,
+		UserNumber13 : null,
+		UserNumber14 : null,
+		UserNumber15 : null,
+		UserNumber16 : null,
+		UserNumber17 : null,
+		UserNumber18 : null,
+		UserNumber19 : null,
+		UserNumber20 : null,
+		UserRate1 : null,
+		UserRate2 : null,
+		UserRate3 : null,
+		UserRate4 : null,
+		UserRate5 : null,
+		UserRate6 : null,
+		UserRate7 : null,
+		UserRate8 : null,
+		UserRate9 : null,
+		UserRate10 : null,
+		UserRate11 : null,
+		UserRate12 : null,
+		UserRate13 : null,
+		UserRate14 : null,
+		UserRate15 : null,
+		UserRate16 : null,
+		UserRate17 : null,
+		UserRate18 : null,
+		UserRate19 : null,
+		UserRate20 : null,
+		LoanId : if (!isEmpty(vars.NextLoanID)) (vars.NextLoanID ) else vars.NextLoanID default null,
+		AccountNumber : vars.AccountNumber default null
+		
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<sub-flow name="validateSoapResponseSubFlow" doc:id="db1222f4-9e8a-43f3-b0b0-5c4c442a89a1" >
+		<choice doc:name="Choice" doc:id="0919c52b-232e-477e-86e0-aa31592a2bc2" >
+			<when expression="#[payload.Envelope.Body.Fault.faultcode == 'soap:Client' or payload.Envelope.Body.Fault.faultcode == 'soap:Server']">
+				<set-variable value='#["handledErrors"]' doc:name="Set strErrorStep" doc:id="639398d5-8e38-45d0-a208-8e600653affc" variableName="strErrorStep"/>
+				<set-payload value="#[strDescription: payload.Envelope.Body.Fault.faultstring]" doc:name="Set strDescription" doc:id="ab807ddf-95ae-4a6c-bcb0-2192b460d070" />
+				<logger level="INFO" doc:name="LogErrorResponseFromSysLayre" doc:id="11303368-1dc3-41de-bc15-08db22bf8bf7" message="ErrorResponseFromEpysis :: #[payload]"/>
+				<raise-error doc:name="Raise error" doc:id="138fcc8f-19e8-446b-b530-9cf61cc1906a" type="ANY"/>
+			
+</when>
+		
+</choice>
+	</sub-flow>
+	<flow name="AddressSplittingFlow" doc:id="10dd40e5-5db0-4638-adde-a3fd73b7f7eb" >
+		<set-variable value='#[${AddressSplitter}]' doc:name="strAddressSplit" doc:id="b93f8c9b-8c3f-4b81-b606-b65e4883933c" variableName="strAddressSplit" doc:description="seperates street and PO Box to extra address field."/>
+		<foreach doc:name="For Each" doc:id="7973aa44-2558-4244-a9e8-1e6262520472" collection="#[vars.strAddressSplit]" >
+			<choice doc:name="Choice" doc:id="c19b7698-3a6b-41ba-9e97-2447a65d4b38" >
+				<when expression="#[vars.ParamArray.AddressFull != null and (vars.varAddressSplit.ExtraAddress == null or vars.varAddressSplit.ExtraAddress == '')]" >
+					<ee:transform doc:name="Split Address with keys" doc:id="01be20c5-c0e9-45c0-a19a-273b193b8cc9" >
+						<ee:message />
+						<ee:variables >
+							<ee:set-variable variableName="varAddressSplit" ><![CDATA[%dw 2.0
+output application/java
+fun spaceSplit(string) = (string) scan /([\w].{0,39})(?:\s|$)/
+---
+{
+Street : if(upper(vars.ParamArray.AddressFull) contains payload)((upper(vars.ParamArray.AddressFull) splitBy payload)[0]) else null,
+ExtraAddress: if(upper(vars.ParamArray.AddressFull) contains payload)
+(upper(payload) ++ (upper(vars.ParamArray.AddressFull) splitBy payload)[1])
+else(if(trim(upper(vars.ParamArray.AddressFull)) startsWith(trim(payload)))
+	(if(sizeOf(vars.ParamArray.AddressFull) >40)
+	((spaceSplit(upper(vars.ParamArray.AddressFull)))[0][1]) else upper(vars.ParamArray.AddressFull)) else null)
+}
+]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</when>
+			</choice>
+		</foreach>
+		<choice doc:name="Choice" doc:id="c225b282-0e5d-4e2c-a577-d4532656f296" >
+			<when expression="#[vars.varAddressSplit.ExtraAddress == null and vars.varAddressSplit.Street == null]" >
+				<ee:transform doc:name="split address before space" doc:id="85ee8ce5-40ca-459c-98b8-8a7ca0d1f764" >
+					<ee:message />
+					<ee:variables >
+						<ee:set-variable variableName="varAddressSplitWithLength" ><![CDATA[%dw 2.0
+output application/java
+fun spaceSplit(string) = (string) scan /([\w].{0,39})(?:\s|$)/
+---
+{
+Street: if(vars.ParamArray.AddressFull != null)
+	(spaceSplit(vars.ParamArray.AddressFull)[0][1])
+else (vars.ParamArray.AddressFull),
+ExtraAddress: if(vars.ParamArray.AddressFull != null)
+((spaceSplit(vars.ParamArray.AddressFull))[1][1]) 
+else (vars.ParamArray.AddressFull)
+
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Splitting with length" doc:id="0cc2b76e-2870-4cdf-ae43-5d3f6bf0d6c6" >
+					<ee:message />
+					<ee:variables >
+						<ee:set-variable variableName="varAddressSplit" ><![CDATA[%dw 2.0
+output application/java
+fun spaceSplit(string) = (string) scan /([\w].{0,39})(?:\s|$)/
+---
+{
+	Street: if(vars.varAddressSplit.Street != null)(if(sizeOf(vars.varAddressSplit.Street) > 40)(spaceSplit(vars.varAddressSplit.Street)[0][1]) else(vars.varAddressSplit.Street)) else vars.varAddressSplit.Street,
+	ExtraAddress: if(vars.varAddressSplit.Street != null)(if(sizeOf(vars.varAddressSplit.ExtraAddress) > 40)(spaceSplit(vars.varAddressSplit.ExtraAddress)[0][1]) else(vars.varAddressSplit.ExtraAddress)) else (vars.varAddressSplit.ExtraAddress)
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Address splitting with dash" doc:id="623ba40b-96a7-4c40-a3e5-fb11da57131a">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="varAddressSplitWithLength" ><![CDATA[%dw 2.0
+output application/java
+fun spaceSplit(string) = (string) scan /([\w].{0,39})(?:\s|$)/
+---
+{
+Street: if(vars.varAddressSplitWithLength.Street != null)(if((sizeOf(vars.varAddressSplitWithLength.Street))<40)
+(if(sizeOf(vars.varAddressSplitWithLength.Street)==38 or sizeOf(vars.varAddressSplitWithLength.Street)==39)(vars.varAddressSplitWithLength.Street) 
+	else(if((sizeOf(vars.ParamArray.AddressFull)) <38)(vars.varAddressSplitWithLength.Street) 
+		else((vars.ParamArray.AddressFull[0 to 38]) ++ "-")
+	)
+) else (vars.varAddressSplitWithLength.Street)) else(vars.varAddressSplitWithLength.Street),
+ExtraAddress: if(vars.varAddressSplitWithLength.ExtraAddress !=null and ((sizeOf(vars.varAddressSplitWithLength.Street))<40))
+(if((sizeOf(vars.varAddressSplitWithLength.Street))<40)
+(spaceSplit(vars.ParamArray.AddressFull[39 to ((sizeOf(vars.ParamArray.AddressFull))-1)])[0][1])
+else (vars.varAddressSplitWithLength.ExtraAddress)) else(vars.varAddressSplitWithLength.ExtraAddress)
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow>
+</mule>

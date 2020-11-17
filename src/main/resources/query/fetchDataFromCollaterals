@@ -1,0 +1,18 @@
+SELECT LLC_BI__Collateral__r.LLC_BI__Value__c,
+	LLC_BI__Collateral__r.LLC_BI__Make__c,
+	LLC_BI__Collateral__r.LLC_BI__Model__c,
+	LLC_BI__Collateral__r.LLC_BI__VIN__c,
+	LLC_BI__Collateral__r.LLC_BI__Collateral_Insurance_Company__c,
+	LLC_BI__Collateral__r.LLC_BI__Collateral_Insurance_Phone__c,
+	LLC_BI__Collateral__r.LLC_BI__Collateral_Insurance_Policy_Number__c,
+	LLC_BI__Collateral__r.LLC_BI__Year__c,
+	LLC_BI__Collateral__r.LLC_BI__Insurance_Expiration_Date__c,
+	LLC_BI__Collateral__r.OwnerId,
+	LLC_BI__Collateral__r.Mileage__c,
+	LLC_BI__Collateral__r.Insurance_Effective_Date__c,
+	LLC_BI__Collateral__r.LLC_BI__Collateral_Type__c,
+	LLC_BI__Collateral__r.GAP_Quote_Number__c,
+	LLC_BI__Collateral__r.LLC_BI__Collateral_Type__r.Name,
+	LLC_BI__Collateral__r.Name
+	FROM LLC_BI__Loan_Collateral2__c
+	WHERE LLC_BI__Loan__c = ':LoanId'

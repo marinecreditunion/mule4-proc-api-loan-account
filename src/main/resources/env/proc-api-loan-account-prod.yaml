@@ -1,0 +1,19 @@
+variable: "This is prod value"
+http:
+  host: "marine-sys-api-p.us-e2.cloudhub.io"
+  port: "80"
+  path: "/api/account"
+  pathLoanID: "/api/poweron"
+  pathProjection: "/api/projection"
+  
+DeviceInformation:
+  DeviceNumber: "0"
+  DeviceType: "MULESOFT"
+  Password: "![8TIUfzRVu/vMXiOuTY/okg==]" 
+  
+sfdc:
+  Username : "api.integration@marinecu.com"
+  Pasword : "![24Q3MVK0JDUUQOvd6/lCIAbZiYE3d7kQGbSOnYjrVDo=]"
+  PEToken : "![uwLqZl6VgHzRknlr0NdSrfn3XWdQ9zaVNpGP5fCe+y0=]"
+  streamingChannel : "/event/NewAccountToCore__e"
+  sfdcAutUrl : "https://login.salesforce.com/services/Soap/u/46.0"

@@ -1,0 +1,35 @@
+#%RAML 1.0
+title: proc-api-loan-account
+version: 1.0
+mediaType: [application/json,application/xml]
+protocols: [HTTPS,HTTP]
+
+#All mule applications will have client-id & client-secret policy enforced
+traits: 
+  client-id-required:
+      headers:
+        client_id:
+          type: string
+          required: false
+        client_secret:
+          type: string
+          required: false
+
+resourceTypes:
+  processloanaccount: !include api/processloanaccount.raml
+  loanid: !include api/loanid.raml
+  createloanrecord: !include api/createloanrecord.raml
+  createloanname: !include api/createloanname.raml
+  createloantracking: !include api/createloantracking.raml
+
+/processloanaccount: 
+  type: processloanaccount
+/loanid: 
+  type: loanid
+/createloanrecord:
+  type: createloanrecord
+/createloanname:
+  type: createloanname
+/createtracking:
+  type: createloantracking
+    

@@ -1,0 +1,7 @@
+SELECT LLC_BI__Term_Months__c,
+ LLC_BI__Loan_Officer__c,
+(SELECT Id,Disbursement_Amount__c,Payee__c,Check_Line_2__c,
+Check_Line_3__c,Check_Line_4__c,
+MCU_Account_to_Credit__c,Memo__c,
+Loan__c,Disbursement_Method__c FROM Disbursements__r),cm_Debt_Protection_Option__c
+FROM LLC_BI__Loan__c WHERE X18Digit_Salesforce_ID__c = ':LoanId'

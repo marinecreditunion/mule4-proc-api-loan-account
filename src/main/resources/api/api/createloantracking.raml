@@ -1,0 +1,23 @@
+#%RAML 1.0 ResourceType
+post:
+    is: [client-id-required]
+    description: Use this Endpoint to create loan tracking records  i.e (disbursements,collateral etc.) in to targer system(Epysis).
+    body:
+      application/xml:
+      application/json:
+        #type: 
+        #example: !include examples/LoanTracking/createloantrackingRequest.json
+    responses:
+      200:
+        description: Loan Name Record has created.
+        body:  
+          example: !include examples/LoanTracking/createloantrackingResponse.json
+      400:
+        body:
+            #type: 
+            #example: !include examples/error/400-error.json
+      500:
+        body:
+            #type: error
+            #example: !include examples/error/500-error.json
+            

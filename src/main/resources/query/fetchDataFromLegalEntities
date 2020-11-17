@@ -1,0 +1,21 @@
+SELECT LLC_BI__Account__r.Id,
+		LLC_BI__Account__r.FirstName,
+		LLC_BI__Account__r.MiddleName,
+		LLC_BI__Account__r.LastName,
+		LLC_BI__Account__r.LLC_BI__SS__pc,
+		LLC_BI__Account__r.PersonBirthdate,
+		LLC_BI__Account__r.FinServ__MotherMaidenName__pc,
+		LLC_BI__Account__r.PersonHomePhone,
+		LLC_BI__Account__r.PersonEmail,
+		LLC_BI__Account__r.FinServ__CurrentEmployer__pc,
+		LLC_BI__Account__r.FinServ__Occupation__pc,
+		LLC_BI__Account__r.LLC_BI__Monthly_Income__pc,
+		LLC_BI__Account__r.Work_Phone__pc,
+		LLC_BI__Account__r.LLC_BI__Home_Address__pc,
+		LLC_BI__Account__r.LLC_BI__Home_City__pc,
+		LLC_BI__Account__r.PersonMobilePhone,
+		LLC_BI__Account__r.LLC_BI__Home_State__pc,
+		LLC_BI__Account__r.LLC_BI__Home_Zipcode__pc,
+		Id, LLC_BI__Account__c,LLC_BI__Borrower_Type__c,LLC_BI__Loan__c
+		FROM LLC_BI__Legal_Entities__c
+		WHERE LLC_BI__Loan__c = ':LoanId' AND LLC_BI__Borrower_Type__c != 'Grantor'

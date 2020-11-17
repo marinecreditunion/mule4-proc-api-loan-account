@@ -1,0 +1,23 @@
+#%RAML 1.0 ResourceType
+post:
+    is: [client-id-required]
+    description: Use this Endpoint to Invoke Mule proc Layer which inturn makes subsequent calls i.e loanid,createloanrecord,createloanname,createtracking to Epysis (Core Banking System).
+    body:
+      application/xml:
+        #type: 
+        #example: !include examples/LoanAccount/processloanaccountRequest.xml
+      
+    responses:
+      200:
+        description: Loan Record has created.
+        body:  
+          example: !include examples/LoanAccount/processloanaccountResponse.xml
+      400:
+        body:
+            #type: 
+            #example: !include examples/error/400-error.json
+      500:
+        body:
+            #type: error
+            #example: !include examples/error/500-error.json
+            

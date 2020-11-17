@@ -1,0 +1,21 @@
+#%RAML 1.0 ResourceType
+post:
+    is: [client-id-required]
+    description: Use this Endpoint to validate loanid by making call to targer system(Epysis).
+    body:
+      application/xml:
+        example: !include examples/LoanId/loanidRequest.xml
+    responses:
+      200:
+        description: Loan Record has created.
+        body:  
+          example: !include examples/LoanId/loanidResponse.xml
+      400:
+        body:
+             
+            #example: !include examples/error/400-error.json
+      500:
+        body:
+            #type: error
+            #example: !include examples/error/500-error.json
+            

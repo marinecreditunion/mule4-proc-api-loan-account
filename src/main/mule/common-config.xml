@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+	<http:listener-config name="proc-api-loan-account-httpListenerConfig">
+    <http:listener-connection host="0.0.0.0" port="8081">
+		</http:listener-connection>
+    </http:listener-config>
+	<http:request-config name="Epysis_HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="618d5e5a-0060-4672-9c60-b0b7a6361ca6" >
+		<http:request-connection host="${secure::http.host}" port="80" />
+	</http:request-config>
+	<salesforce:sfdc-config name="nCino_Salesforce_Config" doc:name="Salesforce Config" doc:id="56cbed4e-e865-44f4-aba8-d48a012b6f9b" >
+		<salesforce:cached-basic-connection username="${secure::sfdc.Username}" password="${secure::sfdc.Password}" securityToken="${secure::sfdc.PEToken}" url="${secure::sfdc.sfdcAutUrl}"/>
+	</salesforce:sfdc-config>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="20698645-017c-420b-bbae-8e7eeced7aff" file="env/proc-api-loan-account-${mule.env}.yaml" key="${property.key}" />
+	<global-property doc:name="Global Property" doc:id="e032402c-3792-418c-9fff-d657370b6135" name="AddressSplitter" value='" PO BOX : P.O. BOX : APT : UNIT : CONDO : SUITE "  splitBy(/[:\/]/)' />
+	<global-property doc:name="Global Property" doc:id="1be81c0b-8fe8-4a1e-845e-dd610d2ecc5f" name="strErrorStep" value="Start" />
+	<global-property doc:name="Global Property" doc:id="d34329cc-a22c-4b8f-808c-113d0fa936fc" name="EnableLogs" value="true" />
+	
+</mule>

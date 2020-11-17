@@ -1,0 +1,22 @@
+#%RAML 1.0 ResourceType
+post:
+    is: [client-id-required]
+    description: Use this Endpoint to create loan record in to targer system(Epysis).
+    body:
+      application/xml:
+        #type: 
+        #example: !include examples/LoanRecord/createloanrecordRequest.xml
+    responses:
+      200:
+        description: Loan Record has created.
+        body:  
+          example: !include examples/LoanRecord/createloanrecordResponse.xml
+      400:
+        body:
+            #type: 
+            #example: !include examples/error/400-error.json
+      500:
+        body:
+            #type: error
+            #example: !include examples/error/500-error.json
+            

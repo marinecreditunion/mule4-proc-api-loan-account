@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<flow name="loanIdFlow" doc:id="f4f928df-6f0a-49bb-abde-dcb69c24be29" >
+		<set-payload value="#[payload]" doc:name="SetPayload" doc:id="a665ee61-5ef3-404b-aae1-d02532b25bda"/>
+		<ee:transform doc:name="SetParamArrayVar" doc:id="2a31eab8-15f3-4f92-a2bd-a53494123d0f">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="ParamArray"><![CDATA[%dw 2.0
+output application/json
+
+fun getPurposeCode(val) =
+(
+	(val replace /[^0-9]/  with "") as Number
+)
+---
+{
+   'AdvanceAmount': payload.CreateLoanRecord.Request.AdvanceAmount default 0.00,
+   'ApplicationId': if(payload.CreateLoanRecord.Request.ApplicationId == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.ApplicationId) > 4) (payload.CreateLoanRecord.Request.ApplicationId[0 to 3]) else payload.CreateLoanRecord.Request.ApplicationId default '',
+   'ApprovalCode': payload.CreateLoanRecord.Request.ApprovalCode default 0,
+   'ApprovalDate': payload.CreateLoanRecord.Request.ApprovalDate,
+   'Apr': payload.CreateLoanRecord.Request.Apr default 0,
+   'AvailCreditCalc': payload.CreateLoanRecord.Request.AvailCreditCalc default 0,
+   'BalloonAmount': payload.CreateLoanRecord.Request.BalloonAmount default 0.00,
+   'BalloonDate': payload.CreateLoanRecord.Request.BalloonDate,
+   'Branch': payload.CreateLoanRecord.Request.Branch default 112,
+   'ChargeOffAmount': payload.CreateLoanRecord.Request.ChargeOffAmount default 0.00,
+   'ChargeOffDate': payload.CreateLoanRecord.Request.ChargeOffDate,
+   'ChargeOffType': payload.CreateLoanRecord.Request.ChargeOffType default 0,
+   'CloseDate': payload.CreateLoanRecord.Request.CloseDate,
+   'CollateralCode': payload.CreateLoanRecord.Request.CollateralCode default 0,
+   'CollateralDate': payload.CreateLoanRecord.Request.CollateralDate,
+   'CouponCode': payload.CreateLoanRecord.Request.CouponCode default 0,
+   'CreatedAtBranch': payload.CreateLoanRecord.Request.CreatedAtBranch default 112,
+   'CreatedByUser': payload.CreateLoanRecord.Request.CreatedByUser default 820,
+   'CredLimitExpiration': payload.CreateLoanRecord.Request.CredLimitExpiration,
+   'CreditLimit': payload.CreateLoanRecord.Request.CreditLimit default 0.00,
+   'CreditReportComment': if(payload.CreateLoanRecord.Request.CreditReportComment == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.CreditReportComment) > 2) (payload.CreateLoanRecord.Request.CreditReportComment[0 to 1]) else payload.CreateLoanRecord.Request.CreditReportComment default '',
+   'CreditReportCompliance': payload.CreateLoanRecord.Request.CreditReportCompliance default '',
+   'CreditReportConsumerInfo': payload.CreateLoanRecord.Request.CreditReportConsumerInfo default '',
+   'CreditReportConsumerInfoDate': payload.CreateLoanRecord.Request.CreditReportConsumerInfoDate,
+   'CreditReportLastStatus': payload.CreateLoanRecord.Request.CreditReportLastStatus default 0,
+   'CreditReportOccurDate': payload.CreateLoanRecord.Request.CreditReportOccurDate,
+   'CreditReportTransferDate': payload.CreateLoanRecord.Request.CreditReportTransferDate,
+   'CreditReportTransferIndicator': payload.CreateLoanRecord.Request.CreditReportTransferIndicator default 0,
+   'CreditReportTransferName': payload.CreateLoanRecord.Request.CreditReportTransferName default '',
+   'CreditReportingCode': payload.CreateLoanRecord.Request.CreditReportingCode default 0,
+   'CreditScore': payload.CreateLoanRecord.Request.CreditScore default 0,
+   'CreditScoreType': payload.CreateLoanRecord.Request.CreditScoreType default 0,
+   'DealerCity': if(payload.CreateLoanRecord.Request.DealerCity == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.DealerCity) > 32) (payload.CreateLoanRecord.Request.DealerCity[0 to 31]) else payload.CreateLoanRecord.Request.DealerCity default '',
+   'DealerCode': if(payload.CreateLoanRecord.Request.DealerCode == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.DealerCode) > 10) (payload.CreateLoanRecord.Request.DealerCode[0 to 9]) else payload.CreateLoanRecord.Request.DealerCode default '',
+   'DealerCounty': payload.CreateLoanRecord.Request.DealerCounty default '',
+   'DealerReserve': payload.CreateLoanRecord.Request.DealerReserve default 0.00,
+   'DealerState': payload.CreateLoanRecord.Request.DealerState default '',
+   'Description': if(payload.CreateLoanRecord.Request.Description == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.Description) > 30) (payload.CreateLoanRecord.Request.Description[0 to 29]) else payload.CreateLoanRecord.Request.Description default '',
+   'DiscountRate': payload.CreateLoanRecord.Request.DiscountRate default 0,
+   'DqCalculationMethod': payload.CreateLoanRecord.Request.DqCalculationMethod default 0,
+   'DueDate': payload.CreateLoanRecord.Request.DueDate,
+   'DueDateAdvanceCode': payload.CreateLoanRecord.Request.DueDateAdvanceCode default 0,
+   'DueDay1': payload.CreateLoanRecord.Request.DueDate.day default 0, //payload.CreateLoanRecord.Request.DueDay1 default 0,
+   'DueDay2': payload.CreateLoanRecord.Request.DueDay2 default 0,
+   'EcoaCode': payload.CreateLoanRecord.Request.EcoaCode default 1,
+   'EffectiveApr': payload.CreateLoanRecord.Request.EffectiveApr default 0,
+   'EscrowAmount': payload.CreateLoanRecord.Request.EscrowAmount default 0.00,
+   'EscrowApplied': payload.CreateLoanRecord.Request.EscrowApplied default 0.00,
+   'EscrowBucketAmount1': payload.CreateLoanRecord.Request.EscrowBucketAmount1 default 0.00,
+   'EscrowBucketAmount2': payload.CreateLoanRecord.Request.EscrowBucketAmount2 default 0.00,
+   'EscrowBucketAmount3': payload.CreateLoanRecord.Request.EscrowBucketAmount3 default 0.00,
+   'EscrowBucketAmount4': payload.CreateLoanRecord.Request.EscrowBucketAmount4 default 0.00,
+   'EscrowBucketAmount5': payload.CreateLoanRecord.Request.EscrowBucketAmount5 default 0.00,
+   'EscrowBucketAmount6': payload.CreateLoanRecord.Request.EscrowBucketAmount6 default 0.00,
+   'EscrowBucketAmount7': payload.CreateLoanRecord.Request.EscrowBucketAmount7 default 0.00,
+   'EscrowBucketAmount8': payload.CreateLoanRecord.Request.EscrowBucketAmount8 default 0.00,
+   'EscrowId': if(payload.CreateLoanRecord.Request.EscrowId == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.EscrowId) > 4) (payload.CreateLoanRecord.Request.EscrowId[0 to 3]) else payload.CreateLoanRecord.Request.EscrowId default '',
+   'EscrowUnpaid': payload.CreateLoanRecord.Request.EscrowUnpaid default 0.00,
+   'FirstInsBirthDate': payload.CreateLoanRecord.Request.FirstInsBirthDate,
+   'FirstPaymentDate': payload.CreateLoanRecord.Request.FirstPaymentDate,
+   'GlAccrualStatusOption': payload.CreateLoanRecord.Request.GlAccrualStatusOption default 0,
+   'HighRiskCode': payload.CreateLoanRecord.Request.HighRiskCode default 0,
+   'InsuranceType': payload.CreateLoanRecord.Request.InsuranceType default 0,
+   'IntPaidPartialDayAmt': payload.CreateLoanRecord.Request.IntPaidPartialDayAmt default 0.00,
+   'IntPaidToDate': payload.CreateLoanRecord.Request.IntPaidToDate,
+   'IntUnpaidBilled': payload.CreateLoanRecord.Request.IntUnpaidBilled default 0.00,
+   'InterestDate': payload.CreateLoanRecord.Request.InterestDate,
+   'InterestFromOpen': payload.CreateLoanRecord.Request.InterestFromOpen default 0.00,
+   'InterestLastYear': payload.CreateLoanRecord.Request.InterestLastYear default 0.00,
+   'InterestRate': payload.CreateLoanRecord.Request.InterestRate default 0,
+   'InterestRateIndex': payload.CreateLoanRecord.Request.InterestRateIndex default 0,
+   'InterestRateMargin': payload.CreateLoanRecord.Request.InterestRateMargin default 0,
+   'InterestRateMarginSign': payload.CreateLoanRecord.Request.InterestRateMarginSign default 0,
+   'InterestRateMax': payload.CreateLoanRecord.Request.InterestRateMax default 0,
+   'InterestRateMin': payload.CreateLoanRecord.Request.InterestRateMin default 0,
+   'InterestType': payload.CreateLoanRecord.Request.InterestType default 0,
+   'InterestUnpaid': payload.CreateLoanRecord.Request.InterestUnpaid default 0.00,
+   'LastAdvanceDate': payload.CreateLoanRecord.Request.LastAdvanceDate,
+   'LastCrReportDate': payload.CreateLoanRecord.Request.LastCrReportDate,
+   'LastPaymentDate': payload.CreateLoanRecord.Request.LastPaymentDate,
+   'LateChargeAccrued': payload.CreateLoanRecord.Request.LateChargeAccrued default 0.00,
+   'LateChargeDate': payload.CreateLoanRecord.Request.LateChargeDate,
+   'LateChargeLastYear': payload.CreateLoanRecord.Request.LateChargeLastYear default 0.00,
+   'LateChargeType': payload.CreateLoanRecord.Request.LateChargeType default 8,
+   'LateChargeUnpaid': payload.CreateLoanRecord.Request.LateChargeUnpaid default 0.00,
+   'LesseeCity': payload.CreateLoanRecord.Request.LesseeCity default '',
+   'LesseeCounty': payload.CreateLoanRecord.Request.LesseeCounty default '',
+   'LesseeState': payload.CreateLoanRecord.Request.LesseeState default '',
+   'LoanCode': payload.CreateLoanRecord.Request.LoanCode default 0,
+   'MaturityDate': payload.CreateLoanRecord.Request.MaturityDate,
+   'MaxDueDateAdvancePeriod': payload.CreateLoanRecord.Request.MaxDueDateAdvancePeriod default 0,
+   'MfoelId': payload.CreateLoanRecord.Request.MfoelId default 0,
+   'MicrAcctNumber': payload.CreateLoanRecord.Request.MicrAcctNumber default 0,
+   'MilitaryAprLoan': payload.CreateLoanRecord.Request.MilitaryAprLoan default 0,
+   'MinAdvance': payload.CreateLoanRecord.Request.MinAdvance default 0.00,
+   'MinBalance': payload.CreateLoanRecord.Request.MinBalance default 0.00,
+   'NewLoanDueDateCode': payload.CreateLoanRecord.Request.NewLoanDueDateCode default 0,
+   'NextRateChangeDate': payload.CreateLoanRecord.Request.NextRateChangeDate,
+   'Nickname': if(payload.CreateLoanRecord.Request.Nickname == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.Nickname) > 16) (payload.CreateLoanRecord.Request.Nickname[0 to 15]) else payload.CreateLoanRecord.Request.Nickname default '',
+   'NoteNumber': if(payload.CreateLoanRecord.Request.NoteNumber == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.NoteNumber) > 10) (payload.CreateLoanRecord.Request.NoteNumber[0 to 9]) else payload.CreateLoanRecord.Request.NoteNumber default '',
+   'OccupancyType': payload.CreateLoanRecord.Request.OccupancyType default 0,
+   'OpenDate': payload.CreateLoanRecord.Request.OpenDate ,
+   'OrigInsuranceType': payload.CreateLoanRecord.Request.OrigInsuranceType default 0,
+   'OrigRiskGrade': if(payload.CreateLoanRecord.Request.OrigRiskGrade == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.OrigRiskGrade) > 4) (payload.CreateLoanRecord.Request.OrigRiskGrade[0 to 3]) else payload.CreateLoanRecord.Request.OrigRiskGrade default '',
+   'OrigUnamortizedFees': payload.CreateLoanRecord.Request.OrigUnamortizedFees default 0.00,
+   'OriginalBalance': payload.CreateLoanRecord.Request.OriginalBalance default 0.00,
+   'OriginalDate': payload.CreateLoanRecord.Request.OriginalDate,
+   'OriginalRate': payload.CreateLoanRecord.Request.OriginalRate default 0,
+   'PartialPayment': payload.CreateLoanRecord.Request.PartialPayment default 0.00,
+   'Payment': payload.CreateLoanRecord.Request.Payment default 0.00,
+   'PaymentApplicationMethod': payload.CreateLoanRecord.Request.PaymentApplicationMethod default 0,
+   'PaymentCalcType': payload.CreateLoanRecord.Request.PaymentCalcType default 0,
+   'PaymentCount': payload.CreateLoanRecord.Request.PaymentCount default 0,
+   'PaymentFrequency': payload.CreateLoanRecord.Request.PaymentFrequency default 4,
+   'PaymentHistory1': payload.CreateLoanRecord.Request.PaymentHistory1 default 0,
+   'PaymentHistory2': payload.CreateLoanRecord.Request.PaymentHistory2 default 0,
+   'PaymentHistory3': payload.CreateLoanRecord.Request.PaymentHistory3 default 0,
+   'PaymentHistory4': payload.CreateLoanRecord.Request.PaymentHistory4 default 0,
+   'PaymentHistory5': payload.CreateLoanRecord.Request.PaymentHistory5 default 0,
+   'PaymentHistory6': payload.CreateLoanRecord.Request.PaymentHistory6 default 0,
+   'PaymentHistory7': payload.CreateLoanRecord.Request.PaymentHistory7 default 0,
+   'PaymentHistory8': payload.CreateLoanRecord.Request.PaymentHistory8 default 0,
+   'PaymentMethod': payload.CreateLoanRecord.Request.PaymentMethod default 0,
+   'PaymentSkips': payload.CreateLoanRecord.Request.PaymentSkips default 0,
+   'PaymentType': payload.CreateLoanRecord.Request.PaymentType default 0,
+   'PeriodicCap': payload.CreateLoanRecord.Request.PeriodicCap default 0,
+   'PeriodicFrequency': payload.CreateLoanRecord.Request.PeriodicFrequency default 0,
+   'PeriodicStartDate': payload.CreateLoanRecord.Request.PeriodicStartDate,
+   'PeriodicStartRate': payload.CreateLoanRecord.Request.PeriodicStartRate default 0,
+   'PmiOriginalValue': payload.CreateLoanRecord.Request.PmiOriginalValue default 0.00,
+   'PmiPurchasePrice': payload.CreateLoanRecord.Request.PmiPurchasePrice default 0.00,
+   'PmiYtd': payload.CreateLoanRecord.Request.PmiYtd default 0.00,
+   'PmtBucketAmount1': payload.CreateLoanRecord.Request.PmtBucketAmount1 default 0.00,
+   'PmtBucketAmount2': payload.CreateLoanRecord.Request.PmtBucketAmount2 default 0.00,
+   'PmtBucketAmount3': payload.CreateLoanRecord.Request.PmtBucketAmount3 default 0.00,
+   'PmtBucketDueDate1': payload.CreateLoanRecord.Request.PmtBucketDueDate1,
+   'PmtBucketDueDate2': payload.CreateLoanRecord.Request.PmtBucketDueDate2,
+   'PmtBucketDueDate3': payload.CreateLoanRecord.Request.PmtBucketDueDate3,
+   'PrepaidFinanceChg': payload.CreateLoanRecord.Request.PrepaidFinanceChg default 0.00,
+   'PropertyAddressType': payload.CreateLoanRecord.Request.PropertyAddressType default 0,
+   'PropertyJurisdiction': payload.CreateLoanRecord.Request.PropertyJurisdiction default '',
+   'PurposeCode': if(!isEmpty(payload.CreateLoanRecord.Request.PurposeCode)) getPurposeCode(payload.CreateLoanRecord.Request.PurposeCode) else  0 default 0,
+   'RateChangeCycleMonths': payload.CreateLoanRecord.Request.RateChangeCycleMonths default 0,
+   'Reference': if(payload.CreateLoanRecord.Request.Reference == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.Reference) > 20) (payload.CreateLoanRecord.Request.Reference[0 to 19]) else payload.CreateLoanRecord.Request.Reference default '',
+   'RefinanceDate': payload.CreateLoanRecord.Request.RefinanceDate,
+   'RiskRate': payload.CreateLoanRecord.Request.RiskRate default 0,
+   'SalesTaxCityIndicator': payload.CreateLoanRecord.Request.SalesTaxCityIndicator default 0,
+   'SalesTaxCountyIndicator': payload.CreateLoanRecord.Request.SalesTaxCountyIndicator default 0,
+   'SalesTaxStateIndicator': payload.CreateLoanRecord.Request.SalesTaxStateIndicator default 0,
+   'SalesforceLoanId': payload.CreateLoanRecord.Request.SalesforceLoanId,
+   'SecondInsBirthDate': payload.CreateLoanRecord.Request.SecondInsBirthDate,
+   'SecuredAmount': payload.CreateLoanRecord.Request.SecuredAmount default 0.00,
+   'SecuredCode': payload.CreateLoanRecord.Request.SecuredCode default 0,
+   'Service1': payload.CreateLoanRecord.Request.Service1 default 0,
+   'Service2': payload.CreateLoanRecord.Request.Service2 default 0,
+   'Service3': payload.CreateLoanRecord.Request.Service3 default 0,
+   'Service4': payload.CreateLoanRecord.Request.Service4 default 0,
+   'Service5': payload.CreateLoanRecord.Request.Service5 default 0,
+   'Service6': payload.CreateLoanRecord.Request.Service6 default 0,
+   'Service7': payload.CreateLoanRecord.Request.Service7 default 0,
+   'Service8': payload.CreateLoanRecord.Request.Service8 default 0,
+   'SinglePremiumDisability': payload.CreateLoanRecord.Request.SinglePremiumDisability default 0.00,
+   'SinglePremiumLife': payload.CreateLoanRecord.Request.SinglePremiumLife default 0.00,
+   'StatementDate': payload.CreateLoanRecord.Request.StatementDate,
+   'StatementGroup': payload.CreateLoanRecord.Request.StatementGroup default 0,
+   'StatementMailCode': payload.CreateLoanRecord.Request.StatementMailCode default 0,
+   'StatementPrevDate': payload.CreateLoanRecord.Request.StatementPrevDate,
+   'Type': payload.CreateLoanRecord.Request.Type default 150,
+   'UnamortizedFees': payload.CreateLoanRecord.Request.UnamortizedFees default 0.00,
+   'UserAmount1': payload.CreateLoanRecord.Request.UserAmount1 default 0.00,
+   'UserAmount2': payload.CreateLoanRecord.Request.UserAmount2 default 0.00,
+   'UserChar1': if(payload.CreateLoanRecord.Request.UserChar1 == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.UserChar1) > 40) (payload.CreateLoanRecord.Request.UserChar1[0 to 39]) else payload.CreateLoanRecord.Request.UserChar1 default '',
+   'UserChar2': if(payload.CreateLoanRecord.Request.UserChar2 == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.UserChar2) > 40) (payload.CreateLoanRecord.Request.UserChar2[0 to 39]) else payload.CreateLoanRecord.Request.UserChar2 default '',
+   'UserChar3': if(payload.CreateLoanRecord.Request.UserChar3 == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.UserChar3) > 40) (payload.CreateLoanRecord.Request.UserChar3[0 to 39]) else payload.CreateLoanRecord.Request.UserChar3 default '',
+   'UserChar4': if(payload.CreateLoanRecord.Request.UserChar4 == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.UserChar4) > 40) (payload.CreateLoanRecord.Request.UserChar4[0 to 39]) else payload.CreateLoanRecord.Request.UserChar4 default '',
+   'UserDate1': payload.CreateLoanRecord.Request.UserDate1,
+   'UserDate2': payload.CreateLoanRecord.Request.UserDate2,
+   'VariableRateIndicator': payload.CreateLoanRecord.Request.VariableRateIndicator default 0,
+   //'Vin':if(payload.CreateLoanRecord.Request.Vin == null) ('') else if(sizeOf(payload.CreateLoanRecord.Request.Vin) > 20) (payload.CreateLoanRecord.Request.Vin[0 to 19]) else payload.CreateLoanRecord.Request.Vin default '',
+   'WarningCode1': payload.CreateLoanRecord.Request.WarningCode1 default 0,
+   'WarningCode2': payload.CreateLoanRecord.Request.WarningCode2 default 0,
+   'WarningCode3': payload.CreateLoanRecord.Request.WarningCode3 default 0,
+   'WarningCode4': payload.CreateLoanRecord.Request.WarningCode4 default 0,
+   'WarningCode5': payload.CreateLoanRecord.Request.WarningCode5 default 0,
+   'WarningExpiration1': payload.CreateLoanRecord.Request.WarningExpiration1,
+   'WarningExpiration2': payload.CreateLoanRecord.Request.WarningExpiration2,
+   'WarningExpiration3': payload.CreateLoanRecord.Request.WarningExpiration3,
+   'WarningExpiration4': payload.CreateLoanRecord.Request.WarningExpiration4,
+   'WarningExpiration5': payload.CreateLoanRecord.Request.WarningExpiration5, 
+   'AccountNumber': payload.CreateLoanRecord.Request.AccountNumber,
+   'Ssn': payload.CreateLoanRecord.Request.Ssn default '',	
+}]]></ee:set-variable>
+				<ee:set-variable variableName="errorStep" ><![CDATA["GetLoanIdFromEpysis"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="TransformPayloadToGetLoanIdXMLrequest" doc:id="fae47ec8-01a6-4ed6-a617-3233b941de7c" >
+			<ee:message >
+				<ee:set-payload resource="dwl/getloanidRequest.dwl" />
+			
+</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="LogGetLoanIdRequest" doc:id="bace8850-c882-4866-969b-9b1324510a11" message="PayloadBeforeGetLoanIdCall :: #[payload]"/>
+		<http:request method="POST" doc:name="MakePowerOnLoanIdCall" doc:id="a3307dd8-2ee6-4fae-9479-91cfbb07944f" config-ref="Epysis_HTTP_Request_configuration" path="${secure::http.pathLoanID}" responseTimeout="60000">
+			<reconnect />
+		</http:request>
+		<flow-ref doc:name="MakeCallToValidateSoapResponseSubFlow" doc:id="8dcf338a-2935-42d7-b33f-26ccc6094f40" name="validateSoapResponseSubFlow"/>
+		<logger level="INFO" doc:name="LogGetLoanIdResponse" doc:id="1d57ec2c-f4b7-4052-80a9-14893d2ec530" message="GetLoanIdResponse :: #[payload]"/>
+		<ee:transform doc:name="LoanId and Payload" doc:id="c2126606-ba69-4aee-8097-eb831f516667">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="NextLoanID"><![CDATA[%dw 2.0
+import * from dw::core::Strings
+output application/json
+---
+
+leftPad((payload.Envelope..&Value[2].Value),4, "0")]]></ee:set-variable>
+				<ee:set-variable variableName="AccountNumber"><![CDATA[%dw 2.0
+import * from dw::core::Strings
+output application/json
+---
+
+leftPad((payload.Envelope..&Value[0].Value),10, "0")]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="PublishResultsToLoanRecordList" doc:id="47380d23-a735-44e5-aa11-5a47174df3c6" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="EndLoanResultsSet" ><![CDATA[%dw 2.0
+output application/json
+import * from dw::core::Strings
+fun formatDate(localTime: DateTime) = localTime as String{format: "MM/dd/yyyy"}
+fun lookupLoanId(code) = if (code < 100 ) (code[-2 to -1]) else if (code >= 100) (code[-3 to -1]) else ('')
+---
+[{	
+    MCU_Status__e : "Failure",
+	CreatedBy : "Mulesoft",
+	CreatedByDate : now() as Date {format: 'yyyy-MM-dd'},
+	nCinoApplicationId__c : null,
+	nCinoLoanId__e: vars.originalpayload.CreateLoanRecord.Request.SalesforceLoanId default null,
+    MICRAccountNumber : if(vars.ParamArray.LoanId == null) (vars.ParamArray.AccountNumber) else (2 ++ lookupLoanId(vars.ParamArray.LoanId) ++ vars.ParamArray.AccountNumber) ,
+    Key: if(vars.ParamArray.LoanId == null) (vars.ParamArray.AccountNumber) else ("L-" ++ vars.ParamArray.AccountNumber ++ "-" ++ vars.ParamArray.LoanId ++ "-" ++ formatDate(now() >> 'GMT-6' ) ),
+	MCU_Status_Message__e: {
+		
+		 Status: "Success",
+		"TransactionType": "GetLoanIdFromEpysis",
+        "uuid": vars.uuid,
+        "ErrorCause": error.cause.message default null,
+        "ErrorDescription": error.description default null,
+        "ErrorStep": null,
+         AccountNumber: vars.originalpayload.CreateLoanRecord.Request.AccountNumber default null,
+         EpisysLoanId: vars.NextLoanID default null
+	}
+    
+	}] ++ vars.EndLoanResultsSet]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		
+	
+</flow>
+	<flow name="CreateLoanRecordFlow" doc:id="4dab993a-93ff-4e99-8873-20d90af3553c" >
+		<flow-ref doc:name="MakeCallToInvokeRetrieveMaxVinValueDataFromSF" doc:id="f6877f40-41bf-498c-b501-4ed6d3532f1e" name="RetrieveMaxVinValueDataFromSF"/>
+		<ee:transform doc:name="TransformPayloadToCreateLoanRecordXMLrequest" doc:id="54079268-34d1-4272-a5ce-3e6ad92625e0">
+			<ee:message>
+				<ee:set-payload resource="dwl/createloanrecordRequest.dwl" />
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="errorStep" ><![CDATA["CreateLoanRecordInEpysis"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="LogCreateLoanRecordReqPayload" doc:id="5dbe142a-ee7e-4b8e-83af-0f3313d6651a" message="CreateLoanRecordReqPayload :: #[payload]"/>
+		<http:request method="POST" doc:name="CreateLoanRecordRequest" doc:id="dad33731-93f5-4ff7-b6c2-52371bf73260" path="${secure::http.path}" config-ref="Epysis_HTTP_Request_configuration" responseTimeout="#[60000]">
+			<reconnect />
+		</http:request>
+		<flow-ref doc:name="MakeCallToValidateSoapResponseSubFlow" doc:id="951b0d80-df4a-4f04-b2f8-08964ef1a54a" name="validateSoapResponseSubFlow"/>
+		<logger level="INFO" doc:name="LogCreateLoanRecordResPayload" doc:id="3aec0083-fc85-4a71-abad-d187f97dd331" message="CreateLoanRecordResponsePayload :: #[payload]"/>
+		<ee:transform doc:name="PublishStep2ResultsToLoanRecordList" doc:id="4c798fca-714c-4869-b37d-28e2e7c7d61e">
+			<ee:message>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="EndLoanResultsSet" ><![CDATA[%dw 2.0
+output application/json
+import * from dw::core::Strings
+fun formatDate(localTime: DateTime) = localTime as String{format: "MM/dd/yyyy"}
+fun lookupLoanId(code) = if (code < 100 ) (code[-2 to -1]) else if (code >= 100) (code[-3 to -1]) else ('')
+---
+
+[{	
+    CreatedBy : "Mulesoft",
+	CreatedByDate : now() as Date {format: 'yyyy-MM-dd'},
+	nCinoLoanId__e: vars.originalpayload.CreateLoanRecord.Request.SalesforceLoanId default null,
+	nCinoApplicationId__c  : null,
+	MICRAccountNumber: 2 ++ lookupLoanId(vars.NextLoanId!) ++ vars.AccountNumber! default '',
+    Key: "L-" ++ vars.AccountNumber!   ++ "-" ++ vars.NextLoanId! ++ "-" ++ formatDate(now() >> 'GMT-6' ) default '',   //++ (formatDate(now() >> 'GMT-6' as String(format: "MM/dd/yyyy")  ) ),
+	MCU_Status_Message__e: {
+		
+		Status: "Success",
+	    "TransactionType": "CreateLoanRecord",
+		uuid: vars.uuid,
+		ErrorCause: error.cause.message default null,
+		ErrorDescription : error.description default null,
+		ErrorStep: null,
+		LoanOpenDate: formatDate(now() >> 'GMT-6' ),
+		AccountNumber: vars.originalpayload.CreateLoanRecord.Request.AccountNumber default null,
+	    EpisysLoanId: vars.NextLoanID default null
+	}
+    
+	}] ++ vars.EndLoanResultsSet
+]]></ee:set-variable>
+				<ee:set-variable variableName="LoanOpenDate" ><![CDATA[%dw 2.0
+output application/json
+fun formatDate(localTime: DateTime) = localTime as String{format: "MM/dd/yyyy"}
+---
+formatDate(now() >> 'GMT-6' )]]></ee:set-variable>
+			</ee:variables>
+		
+</ee:transform>
+		
+	
+</flow>
+	
+	
+	
+</mule>

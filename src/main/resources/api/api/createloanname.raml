@@ -1,0 +1,23 @@
+#%RAML 1.0 ResourceType
+post:
+    is: [client-id-required]
+    description: Use this Endpoint to create loan name accounts i.e (co-signers, borrowers,c-borrowers,grantors etc.) in to targer system(Epysis).
+    body:
+      application/xml:
+      application/json:
+        #type: 
+        #example: !include examples/LoanName/createloannameRequest.json
+    responses:
+      200:
+        description: Loan Name Record has created.
+        body:  
+          #example: !include examples/LoanName/createloannameResponse.json
+      400:
+        body:
+            #type: 
+            #example: !include examples/error/400-error.json
+      500:
+        body:
+            #type: error
+            #example: !include examples/error/500-error.json
+            

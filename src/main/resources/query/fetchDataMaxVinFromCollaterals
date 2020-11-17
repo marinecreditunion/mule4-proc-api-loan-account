@@ -1,0 +1,5 @@
+SELECT 
+LLC_BI__Collateral__r.LLC_BI__VIN__c
+FROM LLC_BI__Loan_Collateral2__c
+WHERE LLC_BI__Loan__c = ':LoanId'
+ORDER BY LLC_BI__Collateral_Value__c DESC NULLS LAST LIMIT 1

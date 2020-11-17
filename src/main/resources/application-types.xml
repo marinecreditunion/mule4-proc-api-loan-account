@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="inputQuery2" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: string]]></types:shape>
+    </types:type>
+    <types:type name="inputQuery1" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: string]]></types:shape>
+    </types:type>
+    <types:type name="loanNamepayload" format="json">
+      <types:shape format="weave" example="examples/loanNameRecord.json"><![CDATA[%dw 2.0
+
+type loanNamepayload = Array<{|  FirstName: String,   LLC_BI__Home_Zipcode__pc: Null,   PersonBirthdate: String,   LLC_BI__Home_City__pc: Null,   "type": String,   MiddleName: Null,   PersonHomePhone: Null,   LLC_BI__Monthly_Income__pc: Null,   LLC_BI__Home_Address__pc: Null,   FinServ__MotherMaidenName__pc: Null,   Work_Phone__pc: Null,   PersonMobilePhone: Null,   LLC_BI__Home_State__pc: Null,   FinServ__Occupation__pc: Null,   Id: String,   LastName: String,   LLC_BI__SS__pc: String,   PersonEmail: String,   FinServ__CurrentEmployer__pc: Null,   LLC_BI__Loan__c: String,   LLC_BI__Borrower_Type__c: String|}> {"example": "[{\\\"FirstName\\\":\\\"Timmy\\\",\\\"LLC_BI__Home_Zipcode__pc\\\":null,\\\"PersonBirthdate\\\":\\\"1999-01-01\\\",\\\"LLC_BI__Home_City__pc\\\":null,\\\"type\\\":\\\"Account\\\",\\\"MiddleName\\\":null,\\\"PersonHomePhone\\\":null,\\\"LLC_BI__Monthly_Income__pc\\\":null,\\\"LLC_BI__Home_Address__pc\\\":null,\\\"FinServ__MotherMaidenName__pc\\\":null,\\\"Work_Phone__pc\\\":null,\\\"PersonMobilePhone\\\":null,\\\"LLC_BI__Home_State__pc\\\":null,\\\"FinServ__Occupation__pc\\\":null,\\\"Id\\\":\\\"0013i00000DDHQDAA5\\\",\\\"LastName\\\":\\\"Tester\\\",\\\"LLC_BI__SS__pc\\\":\\\"XXX-XX-7891\\\",\\\"PersonEmail\\\":\\\"rcranforddemo+mcuutimmytester@gmail.com\\\",\\\"FinServ__CurrentEmployer__pc\\\":null,\\\"LLC_BI__Loan__c\\\":\\\"a0i3K000000DFn5QAG\\\",\\\"LLC_BI__Borrower_Type__c\\\":\\\"Borrower\\\"},{\\\"FirstName\\\":\\\"TU_BRENT\\\",\\\"LLC_BI__Home_Zipcode__pc\\\":\\\"54650-3277\\\",\\\"PersonBirthdate\\\":\\\"1989-06-01\\\",\\\"LLC_BI__Home_City__pc\\\":\\\"ONALASKA 54650-3277\\\",\\\"type\\\":\\\"Account\\\",\\\"MiddleName\\\":null,\\\"PersonHomePhone\\\":null,\\\"LLC_BI__Monthly_Income__pc\\\":\\\"4166.6667\\\",\\\"LLC_BI__Home_Address__pc\\\":\\\"1363 Lauderdale Pl\\\",\\\"FinServ__MotherMaidenName__pc\\\":null,\\\"Work_Phone__pc\\\":null,\\\"PersonMobilePhone\\\":null,\\\"LLC_BI__Home_State__pc\\\":\\\"WI\\\",\\\"FinServ__Occupation__pc\\\":\\\"PMP\\\",\\\"Id\\\":\\\"0013K00000NLX9vQAH\\\",\\\"LastName\\\":\\\"ANTOINE\\\",\\\"LLC_BI__SS__pc\\\":\\\"XXX-XX-7434\\\",\\\"PersonEmail\\\":\\\"brent@fakeemail.com\\\",\\\"FinServ__CurrentEmployer__pc\\\":null,\\\"LLC_BI__Loan__c\\\":\\\"a0i3K000000DFn5QAG\\\",\\\"LLC_BI__Borrower_Type__c\\\":\\\"Grantor\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#94959541-e9c7-4728-aac0-dbf3bb9325d6">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="loanNamepayload"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

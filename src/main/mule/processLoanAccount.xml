@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="processLoanAccountFlow" doc:id="d3a76301-61a4-4d97-9296-9565da716951" >
+
+		<logger level="INFO" doc:name="LogStatus" doc:id="391b684f-49c8-49c9-b7a9-b14f835613e8" message="#[[payload]]"/>
+		<ee:transform doc:name="StoreOriginalPayload" doc:id="95a3c889-9e58-4e0c-a26d-8e0ccd4d6b37" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="originalpayload" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+				<ee:set-variable variableName="salesforceloanid" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.CreateLoanRecord.Request.SalesforceLoanId]]></ee:set-variable>
+				<ee:set-variable variableName="EndLoanResultsSet" ><![CDATA[%dw 2.0
+output application/json
+---
+[]]]></ee:set-variable>
+				<ee:set-variable variableName="nCinoApplicationId" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.CreateLoanRecord.Request.UserChar3]]></ee:set-variable>
+				<ee:set-variable variableName="ReplayId" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.CreateLoanRecord.Request.ReplayId]]></ee:set-variable>
+				<ee:set-variable variableName="LoanOfficer" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.CreateLoanRecord.Request.UserChar2]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Step:1-InvokeLoanIdFlowOnceRequestReceivedFromExpLayer" doc:id="9ba578d2-fd69-4c9b-9d15-d63fa236e7a8" name="loanIdFlow"/>
+		<flow-ref doc:name="Step2::InvokeCreateLoanRecordFlowAfterLoanIdProcess" doc:id="a388e406-3a36-4410-b7b4-814b91d7badb" name="CreateLoanRecordFlow"/>
+		<flow-ref doc:name="step3::InvokecreateLoanNameFlowAfterCreanLoanRecordProcess" doc:id="e9d16a98-d203-4e9a-8c22-7b778c923cf0" name="createLoanNameFlow" />
+		<flow-ref doc:name="step4::InvokecreateLoanTrackingFlowAfterCreanLoanRecordProcess" doc:id="ac1673d7-ad32-46a3-98e2-09f1863f87f0" name="createLoanTrackingFlow" />
+		<ee:transform doc:name="SetEndResponseToExpLayer" doc:id="eba3168b-3cda-491c-918b-1de7a44dd48e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	MCU_Status__c: "Processed",
+	//CreatedBy: (vars.EndLoanResultsSet filter (!isEmpty($.CreatedBy) ))[0].CreatedBy,
+	//Replayid: vars.ReplayId,
+	CreatedDate: (vars.EndLoanResultsSet filter (!isEmpty($.CreatedBy) ))[0].CreatedByDate,
+	nCinoLoanId__c: (vars.EndLoanResultsSet filter (!isEmpty($.CreatedBy) ))[0].nCinoLoanId__e,
+	nCinoApplicationId__c: vars.nCinoApplicationId,//(vars.EndLoanResultsSet filter (!isEmpty($.CreatedBy) ))[0].nCinoApplicationId__c,
+	MICR_Number__c: (vars.EndLoanResultsSet filter (!isEmpty($.CreatedBy) ))[0].MICRAccountNumber,
+	LookupKey__c: (vars.EndLoanResultsSet filter (!isEmpty($.CreatedBy) ))[0].Key,
+	MCU_Status_Message__c: vars.EndLoanResultsSet map $.MCU_Status_Message__e
+	
+}]]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="LogEndResponsePayload" doc:id="6a49235c-7033-4a74-8efa-3d0b9b28d472" message="EndResponseToExpLayer :: #[payload]"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="9642b9f1-f406-4c5c-8151-cfdfca30516d" >
+				<ee:transform doc:name="SetErrorResponseMessage" doc:id="56cf0b7f-1bf6-4cfa-861d-92635129ee1b" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="genericErrorSet" ><![CDATA[%dw 2.0
+output application/json
+import * from dw::core::Strings
+fun formatDate(localTime: DateTime) = localTime as String{format: "MM/dd/yyyy"}
+fun lookupLoanId(code) = if (code < 100 ) (code[-2 to -1]) else if (code >= 100) (code[-3 to -1]) else ('')
+---
+ [{
+	MCU_Status__e : "Failure",
+	CreatedBy : "Mulesoft",
+	CreatedByDate : now() as Date {format: 'yyyy-MM-dd'},
+	nCinoApplicationId__c : null,
+	nCinoLoanId__e: vars.originalpayload.CreateLoanRecord.Request.SalesforceLoanId default null,
+    MICRAccountNumber : if(vars.ParamArray.LoanId == null) (vars.ParamArray.AccountNumber) else (2 ++ lookupLoanId(vars.ParamArray.LoanId) ++ vars.ParamArray.AccountNumber) ,
+    Key: if(vars.ParamArray.LoanId == null) (vars.ParamArray.AccountNumber) else ("L-" ++ vars.ParamArray.AccountNumber ++ "-" ++ vars.ParamArray.LoanId ++ "-" ++ formatDate(now() >> 'GMT-6' ) ),
+    MCU_Status_Message__e: {
+    	
+    	Status: "Failure",
+	    "TransactionType": "LoanServices",
+    	uuid: vars.uuid,
+    	ErrorCause : if (!isEmpty(vars.strErrorStep) and vars.strErrorStep == "handledErrors") "ValidationError" else if (!isEmpty(error.cause.message) and sizeOf(error.cause.message) > 100 ) error.cause.message[0 to 100] else error.cause.message default null,
+	    ErrorDescription: if (!isEmpty(vars.strErrorStep) and vars.strErrorStep == "handledErrors") payload.strDescription else if (!isEmpty(error.description) and sizeOf(error.description) > 100 ) error.description[0 to 100] else error.description default null,
+	    ErrorStep: vars.errorStep,
+	    AccountNumber: vars.originalpayload.CreateLoanRecord.Request.AccountNumber default null,
+	    EpisysLoanId: vars.NextLoanID default null,
+	    LoanOpenDate : formatDate(now() >> 'GMT-6' ),
+    } 
+	
+}]]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<ee:transform doc:name="Transform Message" doc:id="c95f6242-cb35-4bef-a9c5-afefdcc936f1">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var endRes = (vars.genericErrorSet ++ vars.EndLoanResultsSet)
+---
+
+[{
+	MCU_Status__c: "Processed",
+	//CreatedBy: (endRes filter (!isEmpty($.CreatedBy) ))[0].CreatedBy,
+	//Replayid: vars.ReplayId,
+	CreatedDate: (endRes filter (!isEmpty($.CreatedBy) ))[0].CreatedByDate,
+	nCinoLoanId__c: (endRes filter (!isEmpty($.CreatedBy) ))[0].nCinoLoanId__e,
+	nCinoApplicationId__c: vars.nCinoApplicationId,//(vars.EndLoanResultsSet filter (!isEmpty($.CreatedBy) ))[0].nCinoApplicationId__c,
+	MICR_Number__c: (endRes filter (!isEmpty($.CreatedBy) ))[0].MICRAccountNumber,
+	LookupKey__c: (endRes filter (!isEmpty($.CreatedBy) ))[0].Key,
+	MCU_Status_Message__c: endRes map $.MCU_Status_Message__e
+	
+}]]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="LogEndResponsePayload" doc:id="015d2f9e-5e10-401b-8e9a-9a39dc62ca28" message="EndResponseToExpLayer :: #[payload]"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

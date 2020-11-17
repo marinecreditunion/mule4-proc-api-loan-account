@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="RetrieveLoanNameDataFromSF" doc:id="bc8e8ead-2352-40e1-8e29-787ebca6d8cc" initialState="started">
+		<set-variable value='#[vars.salesforceloanid]' doc:name="SetLoanIdFromSourcePayload" doc:id="3872488c-37bd-4ef5-a03b-13103c5aa576" variableName="loanid"/>
+		<salesforce:query doc:name="QueryLegalEntityTypesAndAccountsInfoForGivenLoanId" doc:id="6277fd31-c7f8-4971-8c1e-5ae62b49f801" config-ref="nCino_Salesforce_Config" >
+			<reconnect/>
+			<salesforce:salesforce-query ><![CDATA[${file::query/fetchDataFromLegalEntities}]]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"LoanId" : vars.loanid
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="setCreateLoanNameData" doc:id="751801a1-9aa3-4f31-ae5c-3c5dd7923860" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ((entity) -> {
+    (entity.LLC_BI__Account__r),
+    LLC_BI__Loan__c: entity.LLC_BI__Loan__c default '',
+    LLC_BI__Borrower_Type__c: entity.LLC_BI__Borrower_Type__c default ''
+
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="LogCreateLoanNameData" doc:id="30e837ee-3cb2-4dbb-b704-6d5f677c3918" message="CreateLoanNameDataFromSF :: #[payload]" />
+	</flow>
+	<flow name="RetrieveLoanTrackingDataFromSF" doc:id="4c9cb168-7078-4c16-aea4-17acb60a6c4c" >
+		<set-variable value='#[vars.salesforceloanid]' doc:name="SetLoanIdFromSourcePayload" doc:id="42588442-ba92-4d93-8084-3bec875e5f88" variableName="loanid"/>
+		<salesforce:query doc:name="QueryDisbursementForGivenLoanId" doc:id="efc90e88-6dc9-4f49-b3e1-8605bb487706" config-ref="nCino_Salesforce_Config">
+			<reconnect/>
+			<salesforce:salesforce-query ><![CDATA[${file::query/fetchDataFromDisbursements}]]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"LoanId" : vars.loanid
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<logger level="INFO" doc:name="Logger" doc:id="87128964-22ce-4f24-a76a-5b316192b1f9" message="#[payload]"/>
+		<ee:transform doc:name="StoreDisbursementResultSet" doc:id="df99d045-2f2f-4751-a594-2a8af0fd4a54" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="disbursementSet" ><![CDATA[%dw 2.0
+output application/json
+---
+payload[0].Disbursements__r map $ default []]]></ee:set-variable>
+				<ee:set-variable variableName="ELASet" ><![CDATA[%dw 2.0
+output application/json
+---
+[{   LLC_BI__Loan_Officer__c :payload[0].LLC_BI__Loan_Officer__c default "",
+   LLC_BI__Term_Months__c :payload[0].LLC_BI__Term_Months__c default "" ,
+   cm_Debt_Protection_Option__c :payload[0].cm_Debt_Protection_Option__c default ""}]
+   ]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<salesforce:query doc:name="QueryCollateralsForGivenLoanId" doc:id="7d87fe50-99fd-471d-8d8e-9685ab6219de" config-ref="nCino_Salesforce_Config">
+			<reconnect />
+			<salesforce:salesforce-query ><![CDATA[${file::query/fetchDataFromCollaterals}]]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"LoanId" : vars.loanid
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="MergeDisbursementListAndCollateralListAndPrepareLoanTrackingList" doc:id="d1588f1f-a398-4cdd-98aa-c7a9ef020051" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var incrementalVal = 0 as Number
+fun getELA() = 
+(
+	[{ 
+ 	(vars.ELASet map $),
+ 	"type" : "ELA",
+ 	(Disbursements : vars.disbursementSet map $ default null),
+ 	(OwnerId : payload[0].LLC_BI__Collateral__r.OwnerId default null)
+ 	}]
+)
+---
+ (((payload map $.LLC_BI__Collateral__r) map ((Val , incrementalVal) -> ({
+ 	
+ 	CollateralNumber : ( incrementalVal + 1)
+ }) ++ Val)) ++ vars.disbursementSet
+  ++ (getELA()))]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="RetrieveMaxVinValueDataFromSF" doc:id="8ade7709-e8f4-47fb-9332-0def1e06deba" >
+		<set-variable value="#[vars.salesforceloanid]" doc:name="SetLoanIdFromSourcePayload" doc:id="8afdaa3b-5bf7-4522-b4f7-3f787603a6fc" variableName="loanid" />
+		<logger level="INFO" doc:name="Logger" doc:id="b7cd7bff-d5b4-42d7-8ee1-8b50c9fc2b4c" message="#[payload]" />
+		<salesforce:query doc:name="QueryMaxVinValueForGivenLoanId" doc:id="4dd8c7bb-2d1a-4849-a419-e9cd457e2aa5" config-ref="nCino_Salesforce_Config" >
+			<reconnect />
+			<salesforce:salesforce-query >${file::query/fetchDataMaxVinFromCollaterals}</salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"LoanId" : vars.loanid
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<set-variable value='#[LLC_BI__VIN__c : payload[0].LLC_BI__Collateral__r.LLC_BI__VIN__c default ""]' doc:name="SetMaxVinByValue" doc:id="684d7dcb-1cd0-4126-8dd1-55e47aa0befa" variableName="SetMaxVinByValue"/>
+	</flow>
+</mule>
