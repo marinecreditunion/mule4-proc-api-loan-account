@@ -36,6 +36,7 @@
                          <applicationName>${cloudhub.app}</applicationName>
                          <businessGroup>${cloudhub.bg}</businessGroup>
                          <workerType>${cloudhub.worker}</workerType>
+			 <objectStoreV2>true</objectStoreV2>
                          <properties>
               				<securePropertiesKey>${env.Secure_Prop_Key}</securePropertiesKey>
              				 <env>${env.Settings_env}</env>
