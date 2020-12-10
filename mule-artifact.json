@@ -1,3 +1,4 @@
 {
+  "secureProperties": ["property.key"],
   "minMuleVersion": "4.3.0"
 }
