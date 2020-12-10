@@ -38,7 +38,7 @@
                          <workerType>${cloudhub.worker}</workerType>
 			 <objectStoreV2>true</objectStoreV2>
                          <properties>
-              				<property.key>${env.Secure_Prop_Key}</property.key>
+              				<property.key>${env.PROPERTY_KEY}</property.key>
 				        <mule.env>${env.name}</mule.env>
              				 
   						</properties>
