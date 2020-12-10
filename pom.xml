@@ -39,6 +39,7 @@
 			 <objectStoreV2>true</objectStoreV2>
                          <properties>
               				<securePropertiesKey>${env.Secure_Prop_Key}</securePropertiesKey>
+				        <mule.env>${env.name}</mule.env>
              				 
   						</properties>
                     </cloudHubDeployment>
