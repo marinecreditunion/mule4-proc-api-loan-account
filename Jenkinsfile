@@ -7,7 +7,7 @@ pipeline {
     MULE_VERSION = '4.3.0'
     BG = "Marine Credit Union"
     WORKER = "Micro"
-    Secure_Prop_Key = credentials('secure-prop-keyvalue')
+    PROPERTY_KEY = credentials('anypoint-secdepoly-key')
   }
   stages {
     stage('Build') {
