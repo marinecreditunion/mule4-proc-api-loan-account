@@ -15,5 +15,5 @@ sfdc:
   Username : "api.integration@marinecu.com.stage"
   Password : "![24Q3MVK0JDUUQOvd6/lCIAbZiYE3d7kQGbSOnYjrVDo=]"
   PEToken : "![uwLqZl6VgHzRknlr0NdSrfn3XWdQ9zaVNpGP5fCe+y0=]"
-  streamingChannel : "/event/NewAccountToCore__e"
+  streamingChannel : "/event/NewLoanToCore__e"
   sfdcAutUrl : "https://test.salesforce.com/services/Soap/u/46.0"

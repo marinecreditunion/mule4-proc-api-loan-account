@@ -102,7 +102,7 @@ fun lookupLoanId(code) = if (code < 100 ) (code[-2 to -1]) else if (code >= 100)
 						FirstPaymentDate @(xsi#nil:if(vars.ParamArray.FirstPaymentDate == null)("true") else (false)): vars.ParamArray.FirstPaymentDate,
 						GlAccrualStatusOption: vars.ParamArray.GlAccrualStatusOption,
 						HighRiskCode: vars.ParamArray.HighRiskCode,
-						InsuranceType: vars.ParamArray.InsuranceType,
+						InsuranceType: vars.CalcInsuranceType.CalcInsuranceType,			
 						IntPaidPartialDayAmt: vars.ParamArray.IntPaidPartialDayAmt,
 						IntPaidToDate @(xsi#nil:if(vars.ParamArray.IntPaidToDate == null)("true") else (false)): vars.ParamArray.IntPaidToDate,
 						IntUnpaidBilled: vars.ParamArray.IntUnpaidBilled,

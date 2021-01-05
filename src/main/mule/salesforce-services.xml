@@ -6,6 +6,18 @@
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="RetrieveLoanNameCountFromSF" doc:id="77ea221e-5bcf-440c-8b12-36a0275715d6" >
+		<set-variable value="#[vars.salesforceloanid]" doc:name="SetLoanIdFromSourcePayload" doc:id="903aae91-2b69-4ffc-8dbb-7c525c11acc7" variableName="loanid" />
+		<salesforce:query doc:name="QueryLegalEntityCountForGivenLoanId" doc:id="389a22ea-e1ed-4532-a604-e76b93284782" config-ref="nCino_Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[${file::query/fetchDataFromLegalEntitiesCount}]]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"LoanId" : vars.loanid
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<set-variable value="#[payload]" doc:name="SetCountNameRecords" doc:id="91d73da9-44b4-4e4a-b5a4-0f0ca2df214c" variableName="SetCountNameRecords"/>
+	</flow>
 	<flow name="RetrieveLoanNameDataFromSF" doc:id="bc8e8ead-2352-40e1-8e29-787ebca6d8cc" initialState="started">
 		<set-variable value='#[vars.salesforceloanid]' doc:name="SetLoanIdFromSourcePayload" doc:id="3872488c-37bd-4ef5-a03b-13103c5aa576" variableName="loanid"/>
 		<salesforce:query doc:name="QueryLegalEntityTypesAndAccountsInfoForGivenLoanId" doc:id="6277fd31-c7f8-4971-8c1e-5ae62b49f801" config-ref="nCino_Salesforce_Config" >

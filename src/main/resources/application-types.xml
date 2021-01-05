@@ -26,4 +26,5 @@ type loanNamepayload = Array<{|  FirstName: String,   LLC_BI__Home_Zipcode__pc: 
       </types:input-event>
     </types:processor-declaration>
   </types:enrichment>
+  <types:enrichment select="#63e58356-fea4-4e73-812a-304a3f97dae6"/>
 </types:mule>
