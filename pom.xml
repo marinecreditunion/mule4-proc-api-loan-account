@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.mcu.mule4</groupId>
-	<artifactId>proc-api-loan-account</artifactId>
+	<artifactId>MULE-CLX-proc-loan-account</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>mule-application</packaging>
 

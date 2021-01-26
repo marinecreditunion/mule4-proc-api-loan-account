@@ -34,7 +34,7 @@ pipeline {
      stage('Deploy To Cloudhub') {
       environment {
         ENVIRONMENT = 'Sandbox'
-        APP_NAME = 'proc-api-loan-account-jenkins'
+        APP_NAME = 'MULE-CLX-proc-loan-account'
       }
       steps {
             bat 'mvn -U -V -e -B -DskipTests deploy -DmuleDeploy -Dmule.version="%MULE_VERSION%" -Danypoint.username="%DEPLOY_CREDS_USR%" -Danypoint.password="%DEPLOY_CREDS_PSW%" -Dcloudhub.app="%APP_NAME%" -Dcloudhub.environment="%ENVIRONMENT%" -Dcloudhub.bg="%BG%" -Dcloudhub.worker="%WORKER%" -Denv.name=test '
